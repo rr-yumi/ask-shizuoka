@@ -1,0 +1,70 @@
+---
+// 検索結果ページ（/search/?q=キーワード）
+// 全記事をカードで書き出しておき、ブラウザ側でキーワードに合うものだけ表示する
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import PostCard from '../components/PostCard.astro';
+import { getPosts, categoryName } from '../lib/microcms';
+import { buttonStyle } from '../lib/styles';
+
+const posts = await getPosts();
+
+// 検索対象の文章（タイトル・説明文・エリア・本文）を小文字でまとめる
+const searchText = (post: (typeof posts)[number]) =>
+	[post.title, post.description, categoryName(post.category), post.content.replace(/<[^>]*>/g, ' ')]
+		.join(' ')
+		.replace(/\s+/g, ' ')
+		.toLowerCase();
+---
+
+<Layout>
+	<Header />
+
+	<main class="pt-[120px] pb-section pc:pt-[150px]">
+		<div class="mx-auto max-w-limit px-gutter">
+			<h1 class="text-center font-en text-[35px] text-blue font-bold pc:text-[45px]">SEARCH</h1>
+
+			<form method="get" action="/search/" role="search" class="mx-auto mt-8 flex max-w-[640px] flex-col gap-3 tb:flex-row">
+				<label for="search-page-input" class="sr-only">Search</label>
+				<input type="search" id="search-page-input" name="q" placeholder="Search" class="h-[50px] w-full rounded-full border border-muted bg-white px-4 tb:flex-1" />
+				<button type="submit" class={`inline-flex h-[50px] ${buttonStyle}`}>SEARCH</button>
+			</form>
+
+			<p data-search-status aria-live="polite" class="mt-8 text-center"></p>
+
+			<div data-search-list class="mt-5 grid grid-cols-1 gap-4 tb:grid-cols-2 pc:grid-cols-3">
+				{posts.map((post) => <PostCard post={post} data-search={searchText(post)} hidden />)}
+			</div>
+		</div>
+	</main>
+
+	<Footer />
+</Layout>
+
+<script>
+	const input = document.querySelector<HTMLInputElement>('#search-page-input');
+	const status = document.querySelector<HTMLElement>('[data-search-status]');
+	const cards = document.querySelectorAll<HTMLElement>('[data-search-list] article[data-search]');
+
+	if (input && status) {
+		const query = new URLSearchParams(location.search).get('q')?.trim() ?? '';
+		input.value = query;
+
+		if (!query) {
+			status.textContent = 'Enter a keyword to search the articles.';
+		} else {
+			// スペース区切りの語をすべて含む記事を表示（AND 検索）
+			const words = query.toLowerCase().split(/\s+/);
+			let count = 0;
+			cards.forEach((card) => {
+				const hit = words.every((w) => card.dataset.search!.includes(w));
+				card.hidden = !hit;
+				if (hit) count++;
+			});
+			status.textContent = count > 0
+				? `${count} result${count > 1 ? 's' : ''} for “${query}”`
+				: `No results for “${query}”. Try another word, such as an area name.`;
+		}
+	}
+</script>

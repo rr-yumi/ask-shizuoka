@@ -1,0 +1,112 @@
+---
+import { buttonStyle } from '../lib/styles';
+
+type Props = {
+	current?: 'home' | 'list' | 'about';
+};
+
+const { current } = Astro.props;
+
+const links = [
+	{ key: 'home', label: 'HOME', href: '/' },
+	{ key: 'list', label: 'LIST', href: '/list/' },
+	{ key: 'about', label: 'ABOUT US', href: '/about/' },
+];
+
+// トップページだけロゴを h1 にする（ほかのページはページタイトルが h1）
+const Logo = current === 'home' ? 'h1' : 'div';
+
+const navLinkClass = 'relative text-muted transition-colors duration-300 hover:text-ink aria-[current=page]:text-ink after:absolute after:left-0 after:bottom-0 after:h-1 after:w-full after:origin-left after:scale-x-0 after:bg-orange after:transition-transform after:duration-300 hover:after:scale-x-100 aria-[current=page]:after:scale-x-100';
+---
+
+<header class="sticky top-[34px] z-30 px-gutter font-en">
+	<div class="mx-auto flex max-w-limit items-center justify-between gap-5 rounded-full border border-blue bg-paper px-5 py-3 pc:px-[36px] pc:pt-[33px] pc:pb-[25px]">
+
+		<Logo class="text-[20px]">
+			<a href="/">ASK SHIZUOKA</a>
+		</Logo>
+
+		<!-- スマホ：メニューを開いたときの背景 -->
+		<div id="menu-overlay" class="invisible fixed inset-0 z-40 bg-black/30 opacity-0 backdrop-blur-sm transition-all duration-300 data-open:visible data-open:opacity-100 pc:hidden"></div>
+
+		<!-- スマホ：右から出るパネル / PC：横並び -->
+		<nav id="global-nav" class="invisible fixed top-0 right-0 z-50 flex h-dvh w-[min(80vw,320px)] translate-x-full flex-col items-start gap-6 bg-paper px-8 pt-28 transition-[translate,visibility] duration-300 data-open:visible data-open:translate-x-0 pc:visible pc:static pc:z-auto pc:h-auto pc:w-auto pc:translate-x-0 pc:flex-row pc:items-center pc:bg-transparent pc:p-0 pc:transition-none">
+			{links.map((link) => (
+				<a href={link.href} class={navLinkClass} aria-current={link.key === current ? 'page' : undefined}>{link.label}</a>
+			))}
+			<a href="/contact/" class={`inline-flex h-[38px] self-start tb:hidden ${buttonStyle}`}>CONTACT US</a>
+		</nav>
+
+		<div class="flex items-center gap-3">
+			<button type="button" id="search-toggle" aria-expanded="false" aria-controls="search-modal" class="grid size-[37px] place-items-center rounded-full bg-gray">
+				<img src="/img/icon/search_icon.svg" alt="Search" />
+			</button>
+
+			<a href="/contact/" class={`hidden h-[38px] tb:inline-flex ${buttonStyle}`}>CONTACT US</a>
+
+			<button type="button" id="menu-toggle" aria-expanded="false" aria-controls="global-nav" aria-label="メニュー" class="group relative z-[60] flex size-12 flex-col items-center justify-center gap-1.5 pc:hidden">
+				<span class="block h-0.5 w-[26px] bg-current transition duration-300 group-aria-expanded:translate-y-2 group-aria-expanded:rotate-45"></span>
+				<span class="block h-0.5 w-[26px] bg-current transition duration-300 group-aria-expanded:opacity-0"></span>
+				<span class="block h-0.5 w-[26px] bg-current transition duration-300 group-aria-expanded:-translate-y-2 group-aria-expanded:-rotate-45"></span>
+			</button>
+		</div>
+
+	</div>
+</header>
+
+<!-- 検索モーダル -->
+<dialog id="search-modal" aria-label="Search" class="mx-auto mt-[15vh] w-[min(calc(100%-40px),600px)] rounded-base bg-paper p-0 text-ink backdrop:bg-black/30 backdrop:backdrop-blur-sm">
+	<div class="p-6">
+		<form method="get" action="/search/" role="search" class="flex flex-col gap-3 tb:flex-row">
+			<label for="search" class="sr-only">Search</label>
+			<input type="search" id="search" name="q" placeholder="Search" class="h-[50px] w-full rounded-full border border-muted bg-white px-4 tb:flex-1" />
+			<button type="submit" class={`inline-flex h-[50px] ${buttonStyle}`}>SEARCH</button>
+		</form>
+		<button type="button" id="search-close" class="mt-4 block w-full text-center text-sm text-sub underline">CLOSE</button>
+	</div>
+</dialog>
+
+<script>
+	const toggle = document.getElementById('menu-toggle');
+	const nav = document.getElementById('global-nav');
+	const overlay = document.getElementById('menu-overlay');
+
+	if (toggle && nav && overlay) {
+		const setOpen = (open: boolean) => {
+			toggle.setAttribute('aria-expanded', String(open));
+			nav.toggleAttribute('data-open', open);
+			overlay.toggleAttribute('data-open', open);
+			document.documentElement.classList.toggle('overflow-hidden', open);
+		};
+
+		toggle.addEventListener('click', () => setOpen(toggle.getAttribute('aria-expanded') !== 'true'));
+		overlay.addEventListener('click', () => setOpen(false));
+		nav.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+		document.addEventListener('keydown', (e) => {
+			if (e.key === 'Escape') setOpen(false);
+		});
+		// PC 幅になったら閉じる
+		matchMedia('(width >= 921px)').addEventListener('change', (e) => {
+			if (e.matches) setOpen(false);
+		});
+	}
+
+	// 検索モーダル
+	const searchToggle = document.getElementById('search-toggle');
+	const searchModal = document.getElementById('search-modal') as HTMLDialogElement | null;
+	const searchClose = document.getElementById('search-close');
+
+	if (searchToggle && searchModal && searchClose) {
+		searchToggle.addEventListener('click', () => {
+			searchModal.showModal();
+			searchToggle.setAttribute('aria-expanded', 'true');
+		});
+		searchClose.addEventListener('click', () => searchModal.close());
+		// 背景（dialog 本体）をクリックしたら閉じる
+		searchModal.addEventListener('click', (e) => {
+			if (e.target === searchModal) searchModal.close();
+		});
+		// Esc キーで閉じたとき（dialog 標準）も含め、閉じたら状態を戻す
+		searchModal.addEventListener('close', () => searchToggle.setAttribute('aria-expanded', 'false'));
+	}
+</script>

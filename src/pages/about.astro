@@ -1,0 +1,76 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { buttonStyle } from '../lib/styles';
+
+const steps = [
+	{ num: '01', title: 'You ask', body: 'Send me anything you want to know about eastern Shizuoka — where to stay, what to eat, how to get around.' },
+	{ num: '02', title: 'I answer as a local', body: 'I answer from over 30 years of living here — the places I actually go, and the tips you won’t find in guidebooks.' },
+	{ num: '03', title: 'It becomes an article', body: 'Your question and my answer become an article that anyone planning a trip here can read.' },
+];
+
+const areas = ['IZU', 'Fuji', 'Mishima', 'Numazu', 'Gotenba', 'Atami'];
+---
+
+<Layout>
+	<Header current="about" />
+
+	<main>
+		<!-- イントロ -->
+		<section class="pt-[120px] pb-section pc:pt-[150px]">
+			<div class="mx-auto max-w-[800px] px-gutter text-center">
+				<h1 class="font-en text-[35px] text-blue font-bold pc:text-[45px]">ABOUT US</h1>
+				<p class="mt-8 font-en text-[clamp(28px,5vw,48px)] leading-tight font-black">
+					REAL QUESTIONS FROM<br>
+					EAST SHIZUOKA
+				</p>
+				<p class="mt-8 font-light">
+					Ask Shizuoka is a travel guide built from real questions.
+					I’ve lived in Shizuoka for more than 30 years, and I answer every question myself —
+					with the kind of local knowledge you only get from calling this place home,
+					from Mt. Fuji to the Izu Peninsula.
+				</p>
+			</div>
+		</section>
+
+		<!-- 仕組み -->
+		<section class="pb-section">
+			<div class="mx-auto max-w-limit px-gutter">
+				<h2 class="text-center font-en text-[28px] text-blue font-bold">HOW IT WORKS</h2>
+				<ol class="mt-10 grid grid-cols-1 gap-4 pc:grid-cols-3">
+					{steps.map((step) => (
+						<li class="rounded-base border border-ink/16 bg-card px-6 pt-6 pb-8">
+							<span class="font-roboto text-sm font-medium text-orange">{step.num}</span>
+							<h3 class="mt-3 text-2xl font-bold">{step.title}</h3>
+							<p class="mt-4 font-light">{step.body}</p>
+						</li>
+					))}
+				</ol>
+			</div>
+		</section>
+
+		<!-- 対象エリア -->
+		<section class="pb-section">
+			<div class="mx-auto max-w-[800px] px-gutter text-center">
+				<h2 class="font-en text-[28px] text-blue font-bold">WHERE WE COVER</h2>
+				<p class="mt-5 font-light">From hot-spring towns on the coast to the foothills of Mt. Fuji.</p>
+				<ul class="mt-8 flex flex-wrap justify-center gap-4 font-en">
+					{areas.map((area) => (
+						<li class="rounded-full border border-muted bg-chip px-6 py-3 leading-none text-muted">{area}</li>
+					))}
+				</ul>
+			</div>
+		</section>
+
+		<!-- 質問へ誘導 -->
+		<section class="pb-section">
+			<div class="mx-auto max-w-[800px] px-gutter text-center">
+				<p class="font-light">Have a question of your own?</p>
+				<a href="/#question" class={`mt-6 inline-flex h-[54px] w-[210px] ${buttonStyle}`}>ASK A QUESTION</a>
+			</div>
+		</section>
+	</main>
+
+	<Footer />
+</Layout>

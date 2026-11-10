@@ -1,0 +1,29 @@
+---
+// 記事カード 1 枚。グリッドの中で使い、サブグリッドで横のカードと各行の高さをそろえる
+import type { HTMLAttributes } from 'astro/types';
+import { categoryName, excerpt, type Post } from '../lib/microcms';
+
+type Props = HTMLAttributes<'article'> & {
+	post: Post;
+};
+
+const { post, ...attrs } = Astro.props;
+const area = categoryName(post.category);
+---
+
+<article data-area={area.toLowerCase()} {...attrs} class="row-span-4 grid grid-rows-subgrid gap-0">
+	<!-- サムネイルは 16:9 に切り抜いて配信（microCMS の画像変換）。CSS でも 16:9 に固定 -->
+	<figure>
+		{post.eyecatch && (
+			<img src={`${post.eyecatch.url}?fm=webp&w=800&h=450&fit=crop`} width="800" height="450" alt="" loading="lazy" class="aspect-video h-auto w-full rounded-t-base object-cover" />
+		)}
+	</figure>
+	<div class="row-span-3 grid grid-rows-subgrid gap-0 border border-ink/16 bg-card px-6 pt-6 pb-4">
+		<h3 class="text-2xl leading-none font-bold">{post.title}</h3>
+		<p class="mt-5 text-base font-light">{excerpt(post.description ?? '')}</p>
+		<div class="mt-[45px] flex items-center justify-between gap-4">
+			<span class="font-roboto text-xs font-medium">{area}</span>
+			<a href={`/ask/${post.id}/`} class="inline-flex h-[38px] items-center justify-center rounded-base border border-ink bg-transparent px-gutter font-roboto text-sm font-medium text-ink transition-colors duration-300 hover:bg-ink hover:text-paper">VIEW MORE</a>
+		</div>
+	</div>
+</article>

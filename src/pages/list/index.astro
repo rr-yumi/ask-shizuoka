@@ -1,0 +1,25 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import PostList from '../../components/PostList.astro';
+import { getPosts } from '../../lib/microcms';
+
+// microCMS の全記事（新しい順）
+const posts = await getPosts();
+---
+
+<Layout>
+	<Header current="list" />
+
+	<main class="pt-[120px] pb-section pc:pt-[150px]">
+		<div class="mx-auto max-w-limit px-gutter">
+			<h1 class="text-center font-en text-[35px] text-blue font-bold pc:text-[45px]">ALL QUESTIONS</h1>
+			<p class="mt-5 text-center">Every question we've answered about eastern Shizuoka.</p>
+
+			<PostList posts={posts} />
+		</div>
+	</main>
+
+	<Footer />
+</Layout>

@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* デザイントークン（旧 ENTAG の init.css から移行） */
+@theme {
+	/* Colors */
+	--color-paper: #F7F5EF;     /* 背景 */
+	--color-ink: #262522;       /* 本文 */
+	--color-sub: #504F4B;       /* サブテキスト */
+	--color-muted: #A3A29D;     /* 非アクティブ */
+	--color-gray: #E6E4DF;
+	--color-chip: #F0EBE1;
+	--color-card: #FFFBF2;      /* カード本文の背景 */
+	--color-blue: #24364B;
+	--color-orange: #EE6352;
+
+	/* Fonts */
+	--font-sans: "Noto Sans JP", sans-serif;
+	--font-en: "Geologica", sans-serif;
+	--font-roboto: "Roboto", sans-serif;
+
+	/* Breakpoints（旧 ENTAG と同じ区切り） */
+	--breakpoint-tb: 521px;     /* tb: 521px 以上 */
+	--breakpoint-pc: 921px;     /* pc: 921px 以上 */
+
+	/* Layout */
+	--container-limit: 1335px;  /* max-w-limit */
+	--spacing-gutter: 20px;     /* px-gutter など */
+	--spacing-section: max(60px, 8vw); /* py-section など */
+
+	/* Radius */
+	--radius-base: 24px;        /* rounded-base */
+	--radius-large: 40px;       /* rounded-large */
+}
+
+@layer base {
+	body {
+		background-color: var(--color-paper);
+		color: var(--color-ink);
+		font-family: var(--font-sans);
+		line-height: 1.8;
+	}
+
+	/* Figma の文字間隔 1%（要素ごとの文字サイズで計算） */
+	* {
+		letter-spacing: 0.01em;
+	}
+
+	h1, h2, h3, h4, h5, h6 {
+		line-height: 1.2;
+	}
+}

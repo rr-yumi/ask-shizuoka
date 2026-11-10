@@ -1,0 +1,96 @@
+---
+// チャット風の質問フォーム。送信内容は Web3Forms 経由で登録したメールアドレスに届く
+import { buttonStyle } from '../lib/styles';
+
+// Web3Forms のアクセスキー（ブラウザから送るための公開用キーなので PUBLIC_ を付ける）
+const accessKey = import.meta.env.PUBLIC_WEB3FORMS_KEY ?? '';
+
+// 吹き出し：しっぽ側の下の角だけ小さくし、::before で三角のしっぽを付ける
+const bubbleBase = 'relative max-w-[85%] rounded-[20px] px-5 py-3 text-left before:absolute before:bottom-0 before:size-3 before:content-[""]';
+const bubbleBot = `self-start rounded-bl-[4px] bg-ink text-card before:-left-2 before:bg-ink before:[clip-path:polygon(100%_0,100%_100%,0_100%)] ${bubbleBase}`;
+const bubbleUser = `self-end rounded-br-[4px] bg-card text-ink before:-right-2 before:bg-card before:[clip-path:polygon(0_0,100%_100%,0_100%)] ${bubbleBase}`;
+---
+
+<div class="mx-auto mt-8 max-w-[640px]">
+	<!-- 会話ログ（新しいメッセージを読み上げ） -->
+	<ol data-chat-log aria-live="polite" class="flex flex-col gap-3">
+		<li class={bubbleBot}>
+			Hi! What would you like to know about eastern Shizuoka?
+		</li>
+	</ol>
+
+	<form data-chat-form data-access-key={accessKey} class="mt-5 flex flex-col gap-3 pc:flex-row">
+		<label for="question-input" class="sr-only">Your question</label>
+		<input type="text" id="question-input" name="message" required maxlength="1000" autocomplete="off" placeholder="Ask your own question" class="h-[50px] w-full rounded-full pc:flex-1 border border-muted bg-white px-4 text-ink" />
+		<!-- スパム対策（人には見えない欄。ここに入力があると Web3Forms が弾く） -->
+		<input type="checkbox" name="botcheck" class="hidden" tabindex="-1" autocomplete="off" />
+		<button type="submit" class={`inline-flex h-[50px] disabled:opacity-50 ${buttonStyle}`}>
+			SUBMIT
+		</button>
+	</form>
+
+	<!-- 吹き出しのひな形 -->
+	<template data-bubble-user>
+		<li class={bubbleUser}></li>
+	</template>
+	<template data-bubble-bot>
+		<li class={bubbleBot}></li>
+	</template>
+</div>
+
+<script>
+	const form = document.querySelector<HTMLFormElement>('[data-chat-form]');
+	const log = document.querySelector<HTMLElement>('[data-chat-log]');
+	const userTpl = document.querySelector<HTMLTemplateElement>('[data-bubble-user]');
+	const botTpl = document.querySelector<HTMLTemplateElement>('[data-bubble-bot]');
+
+	if (form && log && userTpl && botTpl) {
+		const input = form.querySelector<HTMLInputElement>('input[name="message"]')!;
+		const button = form.querySelector<HTMLButtonElement>('button[type="submit"]')!;
+
+		const addBubble = (tpl: HTMLTemplateElement, text: string) => {
+			const li = tpl.content.firstElementChild!.cloneNode(true) as HTMLElement;
+			li.textContent = text;
+			log.append(li);
+			return li;
+		};
+
+		form.addEventListener('submit', async (e) => {
+			e.preventDefault();
+			const message = input.value.trim();
+			if (!message) return;
+
+			addBubble(userTpl, message);
+			input.value = '';
+			button.disabled = true;
+			const reply = addBubble(botTpl, 'Sending…');
+
+			try {
+				if (!form.dataset.accessKey) throw new Error('PUBLIC_WEB3FORMS_KEY が設定されていません');
+
+				const res = await fetch('https://api.web3forms.com/submit', {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+					body: JSON.stringify({
+						access_key: form.dataset.accessKey,
+						subject: 'Ask Shizuoka: 新しい質問が届きました',
+						from_name: 'Ask Shizuoka',
+						message,
+						botcheck: (form.elements.namedItem('botcheck') as HTMLInputElement).checked,
+					}),
+				});
+				const data = await res.json();
+				if (!data.success) throw new Error(data.message);
+
+				reply.textContent = 'Thanks! Your question has been sent. I’ll answer it in an article soon. Feel free to ask another one.';
+			} catch (error) {
+				console.error(error);
+				reply.textContent = 'Sorry, something went wrong. Please try again in a moment.';
+				input.value = message; // 送れなかった質問を入力欄に戻す
+			} finally {
+				button.disabled = false;
+				input.focus();
+			}
+		});
+	}
+</script>

@@ -1,0 +1,60 @@
+---
+// エリアの絞り込みボタン＋記事カード一覧
+import PostCard from './PostCard.astro';
+import type { Post } from '../lib/microcms';
+
+type Props = {
+	posts: Post[];
+	limit?: number; // 表示する最大件数（省略時は全件）
+};
+
+const { posts, limit = posts.length } = Astro.props;
+
+const areas = ['All', 'IZU', 'Fuji', 'Mishima', 'Numazu', 'Gotenba', 'Atami'];
+---
+
+<ul data-area-filter class="mt-5 flex flex-wrap items-center justify-center gap-4 font-en">
+	{areas.map((area, i) => (
+		<li>
+			<button
+				type="button"
+				data-area={i === 0 ? 'all' : area.toLowerCase()}
+				aria-pressed={i === 0 ? 'true' : 'false'}
+				class="inline-block cursor-pointer rounded-full border border-muted bg-chip px-6 py-3 leading-none text-muted transition-colors duration-300 hover:border-blue hover:text-ink aria-pressed:border-transparent aria-pressed:bg-orange aria-pressed:text-paper"
+			>{area}</button>
+		</li>
+	))}
+</ul>
+
+<div data-post-list data-limit={limit} class="mt-5 grid grid-cols-1 gap-4 tb:grid-cols-2 pc:grid-cols-3">
+	{posts.map((post, i) => <PostCard post={post} hidden={i >= limit} />)}
+</div>
+<p data-post-empty hidden={posts.length > 0} class="mt-5 text-center text-sub">No articles in this area yet.</p>
+
+<script>
+	// エリアで絞り込み
+	const filter = document.querySelector<HTMLElement>('[data-area-filter]');
+	const list = document.querySelector<HTMLElement>('[data-post-list]');
+	const empty = document.querySelector<HTMLElement>('[data-post-empty]');
+
+	if (filter && list && empty) {
+		const buttons = filter.querySelectorAll<HTMLButtonElement>('button[data-area]');
+		const cards = list.querySelectorAll<HTMLElement>('article[data-area]');
+		const limit = Number(list.dataset.limit);
+
+		const applyFilter = (area: string) => {
+			buttons.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.area === area)));
+
+			// 該当する記事を新しい順に limit 件まで表示
+			let shown = 0;
+			cards.forEach((card) => {
+				const match = area === 'all' || card.dataset.area === area;
+				card.hidden = !match || shown >= limit;
+				if (!card.hidden) shown++;
+			});
+			empty.hidden = shown > 0;
+		};
+
+		buttons.forEach((b) => b.addEventListener('click', () => applyFilter(b.dataset.area ?? 'all')));
+	}
+</script>

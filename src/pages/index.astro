@@ -1,11 +1,64 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import PostList from '../components/PostList.astro';
+import QuestionChat from '../components/QuestionChat.astro';
+import { getPosts } from '../lib/microcms';
+import { buttonStyle } from '../lib/styles';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+// microCMS の記事（新しい順）。絞り込みはブラウザ側で行うので全件読み込み、6 件まで表示
+const posts = await getPosts();
 ---
 
 <Layout>
-	<Welcome />
+	<Header current="home" />
+
+	<section id="hero">
+		<p class="pt-[120px] pb-10 text-center font-en text-[clamp(40px,8vw,80px)] leading-none font-black text-blue pc:pt-[150px] pc:pb-[70px]">
+			REAL QUESTIONS<br>
+			FROM<br>
+			EAST SHIZUOKA
+		</p>
+		<figure>
+			<img src="/img/index/hero.webp" alt="Hero" class="mx-auto h-[50vw] w-full rounded-t-large object-cover pc:h-auto pc:w-auto" />
+		</figure>
+	</section>
+
+	<main>
+		<section id="ask" class="pt-[calc(var(--spacing-section)/2)] pb-section">
+			<div class="mx-auto max-w-limit px-gutter">
+				<div>
+					<h2 class="text-center font-en text-[35px] text-blue font-bold pc:text-[45px]">AREA SEARCH</h2>
+					<p class="mt-5 text-center">Where in eastern Shizuoka are you headed?</p>
+				</div>
+
+				<PostList posts={posts} limit={6} />
+
+				<div class="mt-10 text-center">
+					<a href="/list/" class={`inline-flex h-[54px] w-[210px] ${buttonStyle}`}>VIEW ALL</a>
+				</div>
+			</div>
+		</section>
+
+		<section id="question" class="relative mx-[10px] overflow-hidden rounded-large bg-orange py-section text-card">
+			<!-- 背景の楕円（Figma: 1916×875 / X-16 / Y245、上側はその上下反転） -->
+			<div aria-hidden="true" class="pointer-events-none absolute top-0 left-[-16px] -translate-y-1/2 pc:top-auto pc:bottom-1/2 pc:translate-y-0 aspect-[1916/875] w-[calc(100%+16px)] rounded-[50%] bg-[#FF6853]"></div>
+			<div aria-hidden="true" class="pointer-events-none absolute bottom-0 left-[-16px] translate-y-1/2 pc:top-1/2 pc:bottom-auto pc:translate-y-0 aspect-[1916/875] w-[calc(100%+16px)] rounded-[50%] bg-[#FF6853]"></div>
+
+			<div class="relative mx-auto max-w-limit px-gutter">
+				<p class="pt-[120px] pb-10 text-center font-en text-[clamp(40px,8vw,80px)] leading-none font-black pc:pt-[150px] pc:pb-[70px]">
+					REAL QUESTIONS FROM<br>
+					EAST SHIZUOKA
+				</p>
+				<p class="mt-5 text-center">
+					Ask us, and we'll turn it into an article.
+				</p>
+
+				<QuestionChat />
+			</div>
+		</section>
+	</main>
+
+	<Footer />
 </Layout>

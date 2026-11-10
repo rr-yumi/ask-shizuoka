@@ -1,0 +1,50 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Header from '../../components/Header.astro';
+import Footer from '../../components/Footer.astro';
+import { getPosts, categoryName, formatDate, type Post } from '../../lib/microcms';
+
+// ビルド時に記事ごとのページを書き出す
+export async function getStaticPaths() {
+	const posts = await getPosts();
+	return posts.map((post) => ({ params: { id: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props as { post: Post };
+const category = categoryName(post.category);
+---
+
+<Layout>
+	<Header />
+
+	<main class="mx-auto max-w-[800px] px-gutter pt-[120px] pb-section pc:pt-[150px]">
+		<a href="/list/" class="font-roboto text-sm font-medium">← BACK TO LIST</a>
+
+		<!-- 投稿日付・カテゴリー -->
+		<div class="mt-10 flex items-center gap-4 font-roboto text-xs font-medium">
+			<time datetime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
+			{category && <span>{category}</span>}
+		</div>
+
+		<h1 class="mt-3 text-[32px] font-bold">{post.title}</h1>
+
+		{post.eyecatch && (
+			<img src={`${post.eyecatch.url}?fm=webp&w=1600`} width={post.eyecatch.width} height={post.eyecatch.height} alt="" class="mt-8 h-auto w-full rounded-base" />
+		)}
+
+		<div class="article-body mt-10" set:html={post.content} />
+	</main>
+
+	<Footer />
+</Layout>
+
+<style>
+	/* リッチエディタの HTML 用 */
+	.article-body :global(h2) { margin-top: 2.5em; font-size: 24px; font-weight: 700; }
+	.article-body :global(h3) { margin-top: 2em; font-size: 20px; font-weight: 700; }
+	.article-body :global(p) { margin-top: 1.25em; }
+	.article-body :global(a) { text-decoration: underline; }
+	.article-body :global(img) { margin-top: 1.5em; height: auto; max-width: 100%; border-radius: var(--radius-base); }
+	.article-body :global(ul) { margin-top: 1.25em; padding-left: 1.5em; list-style: disc; }
+	.article-body :global(ol) { margin-top: 1.25em; padding-left: 1.5em; list-style: decimal; }
+</style>

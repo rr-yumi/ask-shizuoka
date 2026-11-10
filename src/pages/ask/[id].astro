@@ -65,7 +65,6 @@ const jsonLd = {
 	.article-body :global(img) { margin-top: 1.5em; height: auto; max-width: 100%; border-radius: var(--radius-base); }
 	.article-body :global(ul) { margin-top: 1.25em; padding-left: 1.5em; list-style: disc; }
 	.article-body :global(ol) { margin-top: 1.25em; padding-left: 1.5em; list-style: decimal; }
-	/* 区切り線の上下は 20px。直後の見出しなどの上余白は消して 20px ちょうどにする */
-	.article-body :global(hr) { margin-block: 20px; }
-	.article-body :global(hr + *) { margin-top: 0; }
+	/* microCMS で入れた区切り線は表示しない */
+	.article-body :global(hr) { display: none; }
 </style>

@@ -65,6 +65,7 @@ const jsonLd = {
 	.article-body :global(img) { margin-top: 1.5em; height: auto; max-width: 100%; border-radius: var(--radius-base); }
 	.article-body :global(ul) { margin-top: 1.25em; padding-left: 1.5em; list-style: disc; }
 	.article-body :global(ol) { margin-top: 1.25em; padding-left: 1.5em; list-style: decimal; }
-	/* microCMS で入れた区切り線 */
-	.article-body :global(hr) { height: 0; color: inherit; border-top-width: 1px; padding-block: 50px; margin-top: 50px; }
+	/* microCMS で入れた区切り線。上下 50px ずつ（直後の見出しなどの上余白は消して均等にする） */
+	.article-body :global(hr) { height: 0; color: inherit; border-top-width: 1px; margin-block: 50px; }
+	.article-body :global(hr + *) { margin-top: 0; }
 </style>

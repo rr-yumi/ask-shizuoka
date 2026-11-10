@@ -1,5 +1,32 @@
 ---
 import '../styles/global.css';
+import { SITE_NAME, DEFAULT_DESCRIPTION, DEFAULT_OG_IMAGE } from '../lib/seo';
+
+type Props = {
+	// ページ名。省略するとサイト名だけ（トップページ用）
+	title?: string;
+	description?: string;
+	// SNS シェア時の画像（絶対 URL かサイト内のパス）
+	image?: string;
+	type?: 'website' | 'article';
+	// 検索結果ページなど、検索エンジンに載せたくないページ
+	noindex?: boolean;
+	// 構造化データ（JSON-LD）
+	jsonLd?: Record<string, unknown>;
+};
+
+const {
+	title,
+	description = DEFAULT_DESCRIPTION,
+	image = DEFAULT_OG_IMAGE,
+	type = 'website',
+	noindex = false,
+	jsonLd,
+} = Astro.props;
+
+const pageTitle = title ? `${title} | ${SITE_NAME}` : `${SITE_NAME} | Real Questions from East Shizuoka`;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+const ogImage = new URL(image, Astro.site);
 ---
 
 <!doctype html>
@@ -10,7 +37,25 @@ import '../styles/global.css';
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<link rel="icon" href="/favicon.ico" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Ask shizuoka</title>
+
+		<title>{pageTitle}</title>
+		<meta name="description" content={description} />
+		<link rel="canonical" href={canonical} />
+		{noindex && <meta name="robots" content="noindex, follow" />}
+		<link rel="sitemap" href="/sitemap.xml" />
+
+		<!-- SNS でシェアしたときの表示 -->
+		<meta property="og:site_name" content={SITE_NAME} />
+		<meta property="og:type" content={type} />
+		<meta property="og:title" content={title ?? SITE_NAME} />
+		<meta property="og:description" content={description} />
+		<meta property="og:url" content={canonical} />
+		<meta property="og:image" content={ogImage} />
+		<meta property="og:locale" content="en_US" />
+		<meta name="twitter:card" content="summary_large_image" />
+
+		{jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+
 		<link rel="preconnect" href="https://fonts.googleapis.com" />
 		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geologica:wght,CRSV@100..900,0&family=Noto+Sans+JP:wght@300;400;700&family=Roboto:wght@500&display=swap" />

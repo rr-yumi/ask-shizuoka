@@ -22,6 +22,7 @@ export type Post = {
 	eyecatch?: Image;
 	content: string; // リッチエディタの HTML
 	publishedAt: string;
+	revisedAt?: string;
 };
 
 type ListResponse<T> = {

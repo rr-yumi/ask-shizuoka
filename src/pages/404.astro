@@ -1,0 +1,24 @@
+---
+// 存在しない URL のページ（Cloudflare Pages はこのファイルがあると 404 を返す）
+import Layout from '../layouts/Layout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { buttonStyle } from '../lib/styles';
+---
+
+<Layout title="Page not found" noindex>
+	<Header />
+
+	<main class="pt-[120px] pb-section pc:pt-[150px]">
+		<div class="mx-auto max-w-[640px] px-gutter text-center">
+			<h1 class="font-en text-[35px] text-blue font-bold pc:text-[45px]">404</h1>
+			<p class="mt-5">Sorry, we couldn’t find that page.</p>
+			<div class="mt-10 flex flex-col items-center gap-4 tb:flex-row tb:justify-center">
+				<a href="/" class={`inline-flex h-[54px] w-[210px] ${buttonStyle}`}>BACK TO HOME</a>
+				<a href="/list/" class="font-roboto text-sm font-medium underline">See all questions</a>
+			</div>
+		</div>
+	</main>
+
+	<Footer />
+</Layout>
